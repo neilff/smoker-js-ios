@@ -1,0 +1,13 @@
+const COLORS = {
+  BLACK: '#212121',
+  GRAY: '#424242',
+  ORANGE: '#D84315',
+  LIGHTORANGE: '#FBE9E7',
+  LIGHTGRAY: '#9E9E9E',
+  LIGHTERGRAY: '#F5F5F5',
+  WHITE: '#EFEFEF',
+  BLUE: '#2196F3',
+  RED: '#FF5722',
+};
+
+module.exports = COLORS;
