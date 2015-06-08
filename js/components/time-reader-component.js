@@ -111,7 +111,6 @@ var TimeReader = React.createClass({
 
     return (
       <ScrollView style={ styles.container }>
-        <View><Text style={ styles.timeReadText }>{ isComplete.toString() }</Text></View>
         <View style={ styles.body }>
           <View style={ styles.time }>
             <Text style={ styles.primaryTimerText }>

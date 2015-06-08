@@ -14,6 +14,7 @@ var R = require('ramda');
 
 var actions = require('../actions/alarm-actions');
 var AlarmStore = require('../stores/alarm-store');
+var NavButton = require('./nav-btn-component');
 
 var COLORS = require('../constants/colors');
 var FONTS = require('../constants/fonts');
@@ -22,19 +23,6 @@ var PickerItemIOS = PickerIOS.Item;
 
 var HOURS = R.range(0, 24);
 var MINUTES = R.range(0, 60);
-
-class NavButton extends React.Component {
-  render() {
-    return (
-      <TouchableHighlight
-        style={styles.button}
-        underlayColor="#B5B5B5"
-        onPress={this.props.onPress}>
-        <Text style={styles.buttonText}>{this.props.text}</Text>
-      </TouchableHighlight>
-    );
-  }
-}
 
 function getStateFromStores() {
   return {
@@ -71,7 +59,7 @@ var TimeEditor = React.createClass ({
     return (
       <ScrollView style={ styles.scene }>
         <View style={ styles.div }>
-          <Text style={ styles.text }>Alarm</Text>
+          <Text style={ styles.text }>Set Alarm</Text>
         </View>
 
         <View style={ styles.pickerWrapper }>

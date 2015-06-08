@@ -48,20 +48,21 @@ var TempWarning = React.createClass({
   },
 
   render: function() {
-    LayoutAnimation.configureNext(animations.layout.spring);
-    var height = 10;
+    var isTooHigh = this.state.isTooHigh;
+    var isTooLow = this.state.isTooLow;
 
-    if (this.state.isTooLow) {
-      height = 50;
-    }
+    LayoutAnimation.configureNext(animations.layout.spring);
 
     return (
       <TouchableHighlight
         onPress={ this.clearWarning }>
         <View style={[ styles.warningWrapper, {
-          height: height,
+          height: isTooHigh || isTooLow ? 50 : 0,
+          backgroundColor: isTooHigh ? COLORS.RED : COLORS.BLUE
         }]}>
-          <Text>{ this.props.message }</Text>
+          <Text style={{
+            color: isTooHigh ? COLORS.GRAY : COLORS.WHITE
+          }}>{ isTooHigh ? 'High Temperature Warning' : 'Low Temperature Warning' }</Text>
         </View>
       </TouchableHighlight>
     );
@@ -70,10 +71,9 @@ var TempWarning = React.createClass({
 
 var styles = StyleSheet.create({
   warningWrapper: {
-    backgroundColor: COLORS.RED,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
 });
 
 var animations = {
