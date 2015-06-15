@@ -96,6 +96,18 @@ TemperatureStore.dispatchToken = register(({action, data}) => {
 
       TemperatureStore.emitChange();
       break;
+
+    /**
+     * Clears the temperature warning
+     */
+    case actions.onClearTempWarning:
+      _temperatureState = _temperatureState.merge({
+        lowAlarm: false,
+        highAlarm: false,
+      });
+
+      TemperatureStore.emitChange();
+      break;
   }
 });
 

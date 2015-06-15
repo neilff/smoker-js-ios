@@ -3,7 +3,26 @@ var dispatch = require('../dispatcher/dispatcher').dispatch;
 window.navigator.userAgent = 'react-native';
 
 var io = require('../../node_modules/socket.io/node_modules/socket.io-client/socket.io');
-var socket = io('http://192.168.0.17:8080', {jsonp: false});
+
+var socket = io('http://localhost:8080', {
+  'jsonp': false,
+});
+
+socket.on('connect_error', function() {
+  console.log('Connection Error');
+});
+
+socket.on('connect', function() {
+  console.log('Connected');
+});
+
+socket.on('disconnect', function() {
+  console.log('Disconnected');
+});
+
+socket.on('error', function() {
+  console.log('Error');
+});
 
 /**
  * Initializes the temperature read from the websocket service
@@ -27,6 +46,13 @@ function onToggleTempWarning() {
 }
 
 /**
+ * Clear any current temperature warning
+ */
+function onClearTempWarning() {
+  dispatch(onClearTempWarning, null);
+}
+
+/**
  * Sets the warning low temperature
  */
 function onSetLowTemp(temp) {
@@ -44,6 +70,7 @@ module.exports = {
   onTemperatureUpdated,
   onTemperatureReadStart,
   onToggleTempWarning,
+  onClearTempWarning,
   onSetLowTemp,
   onSetHighTemp,
 };

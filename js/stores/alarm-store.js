@@ -112,8 +112,6 @@ AlarmStore.dispatchToken = register(({action, data}) => {
         timeRemaining: d,
       });
 
-      console.log(d);
-
       AlarmStore.emitChange();
       break;
 

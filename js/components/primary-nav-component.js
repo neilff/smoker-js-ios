@@ -30,7 +30,7 @@ var ROUTE_STACK = [
   },
 ];
 
-var INIT_ROUTE_INDEX = 1;
+var INIT_ROUTE_INDEX = 0;
 
 /**
  * This component contains the navigator for the primary content, the temp

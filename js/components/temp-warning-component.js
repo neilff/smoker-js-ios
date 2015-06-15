@@ -11,14 +11,17 @@ var {
 var R = require('ramda');
 
 var TemperatureStore = require('../stores/temperature-store');
+var TemperatureActions = require('../actions/temperature-actions');
 
 var COLORS = require('../constants/colors');
 var FONTS = require('../constants/fonts');
+var ANIMATIONS = require('../constants/animations');
 
 function getStateFromStores() {
   return {
     isTooLow: TemperatureStore.isTooLow(),
     isTooHigh: TemperatureStore.isTooHigh(),
+    isAlarmEnabled: TemperatureStore.isAlarmEnabled(),
   };
 }
 
@@ -39,30 +42,68 @@ var TempWarning = React.createClass({
     this.setState(getStateFromStores());
   },
 
-  clearWarning: function() {
-    LayoutAnimation.configureNext(animations.layout.spring);
-
-    this.setState({
-      height: 10,
-    });
-  },
-
   render: function() {
     var isTooHigh = this.state.isTooHigh;
     var isTooLow = this.state.isTooLow;
+    var isAlarmEnabled = this.state.isAlarmEnabled;
 
-    LayoutAnimation.configureNext(animations.layout.spring);
+    LayoutAnimation.configureNext(ANIMATIONS.layout.spring);
 
     return (
+      <View style={ !isAlarmEnabled ? styles.hidden : styles.visible }>
+        <HighWarning visible={ isTooHigh } />
+        <LowWarning visible={ isTooLow } />
+      </View>
+    );
+  }
+});
+
+var LowWarning = React.createClass({
+  clearWarning: function() {
+    LayoutAnimation.configureNext(ANIMATIONS.layout.spring);
+    TemperatureActions.onClearTempWarning();
+  },
+
+  render: function() {
+    var visible = this.props.visible;
+
+    return(
       <TouchableHighlight
         onPress={ this.clearWarning }>
         <View style={[ styles.warningWrapper, {
-          height: isTooHigh || isTooLow ? 50 : 0,
-          backgroundColor: isTooHigh ? COLORS.RED : COLORS.BLUE
+          height: visible ? 50 : 0,
+          backgroundColor: COLORS.BLUE,
         }]}>
           <Text style={{
-            color: isTooHigh ? COLORS.GRAY : COLORS.WHITE
-          }}>{ isTooHigh ? 'High Temperature Warning' : 'Low Temperature Warning' }</Text>
+            color: COLORS.WHITE,
+            fontFamily: FONTS.PRIMARY,
+          }}>Low Temperature Warning</Text>
+        </View>
+      </TouchableHighlight>
+    );
+  }
+});
+
+var HighWarning = React.createClass({
+  clearWarning: function() {
+    LayoutAnimation.configureNext(ANIMATIONS.layout.spring);
+    TemperatureActions.onClearTempWarning();
+  },
+
+  render: function() {
+    var visible = this.props.visible;
+
+    return(
+      <TouchableHighlight
+        onPress={ this.clearWarning }>
+        <View style={[ styles.warningWrapper, {
+          height: visible ? 50 : 0,
+          backgroundColor: COLORS.RED,
+        }]}>
+          <Text style={{
+            color: COLORS.GRAY,
+            fontFamily: FONTS.PRIMARY,
+          }}>High Temperature Warning</Text>
         </View>
       </TouchableHighlight>
     );
@@ -74,39 +115,14 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  hidden: {
+    height: 0,
+  }
 });
 
-var animations = {
-  layout: {
-    spring: {
-      duration: 750,
-      create: {
-        duration: 300,
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.opacity,
-      },
-      update: {
-        type: LayoutAnimation.Types.spring,
-        springDamping: 0.4,
-      },
-    },
-    easeInEaseOut: {
-      duration: 300,
-      create: {
-        type: LayoutAnimation.Types.easeInEaseOut,
-        property: LayoutAnimation.Properties.scaleXY,
-      },
-      update: {
-        delay: 100,
-        type: LayoutAnimation.Types.easeInEaseOut,
-      },
-    },
-  },
-};
-
 var layoutAnimationConfigs = [
-  animations.layout.spring,
-  animations.layout.easeInEaseOut,
+  ANIMATIONS.layout.spring,
+  ANIMATIONS.layout.easeInEaseOut,
 ];
 
 module.exports = TempWarning;

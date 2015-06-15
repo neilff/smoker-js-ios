@@ -16,6 +16,7 @@ var R = require('ramda');
 
 var TemperatureStore = require('../stores/temperature-store');
 var TempSettingButton = require('./temp-setting-btn-component');
+var TempEnabledBtn = require('./temp-enabled-btn-component');
 
 var COLORS = require('../constants/colors');
 var FONTS = require('../constants/fonts');
@@ -56,7 +57,9 @@ var TempReader = React.createClass({
           <View style={[ styles.circle, {
               borderColor: this.state.currentColor,
             }]}>
-            <Text style={ styles.primaryTempText }>{ this.state.tempReading.get('tempF') + '℉' }</Text>
+            <Text style={ styles.primaryTempText }>
+              { this.state.tempReading.get('tempF') + '℉' }
+            </Text>
           </View>
           <View style={ styles.tempSettingsWrapper }>
             <View style={ styles.tempSettingLow }>
@@ -65,6 +68,10 @@ var TempReader = React.createClass({
                 type="LOW"
                 title="LOW TEMP"
                 tempSettingNum={ this.state.tempReading.get('lowThreshold') + '℉' } />
+            </View>
+            <View style={ styles.tempWatchToggle }>
+              <TempEnabledBtn
+                isEnabled={ this.state.tempReading.get('alarmEnabled') } />
             </View>
             <View style={ styles.tempSettingHigh }>
               <TempSettingButton
@@ -96,7 +103,7 @@ var styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0)'
   },
   tempSettingsWrapper: {
-    top: 150,
+    top: 125,
     flexDirection: 'row',
   },
   tempSettingText: {
@@ -114,10 +121,13 @@ var styles = StyleSheet.create({
     fontFamily: FONTS.ALT,
   },
   tempSettingLow: {
-    left: -64,
+    left: -48,
   },
   tempSettingHigh: {
-    left: 64,
+    left: 48,
+  },
+  tempWatchToggle: {
+    top: 64,
   },
   tempSettingCircle: {
     borderWidth: 2,
