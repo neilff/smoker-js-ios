@@ -26,7 +26,8 @@ var MAXIMUM_TEMPERATURES = R.range(1, 500);
 
 function getStateFromStores() {
   return {
-    tempReading: TemperatureStore.getAll()
+    tempReading: TemperatureStore.getAll(),
+    tempSymbol: TemperatureStore.getCurrentTemperatureSetting().symbol,
   };
 }
 
@@ -58,6 +59,7 @@ var TempEditor = React.createClass({
   render: function() {
     var type = this.props.type;
     var pickerComponent = null;
+    var symbol = this.state.tempSymbol;
 
     switch (type) {
       case 'LOW':
@@ -75,7 +77,7 @@ var TempEditor = React.createClass({
                   <PickerItemIOS
                     key={ temp }
                     value={ temp }
-                    label={ temp + '℉' }
+                    label={ temp + symbol }
                     />
                 );
               })}
@@ -99,7 +101,7 @@ var TempEditor = React.createClass({
                   <PickerItemIOS
                     key={ temp }
                     value={ temp }
-                    label={ temp + '℉' }
+                    label={ temp + symbol }
                     />
                 );
               })}

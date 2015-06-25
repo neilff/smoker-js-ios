@@ -17,6 +17,7 @@ var R = require('ramda');
 var TemperatureStore = require('../stores/temperature-store');
 var TempSettingButton = require('./temp-setting-btn-component');
 var TempEnabledBtn = require('./temp-enabled-btn-component');
+var SetTempDisplay = require('./setting-temp-display-component');
 
 var COLORS = require('../constants/colors');
 var FONTS = require('../constants/fonts');
@@ -25,7 +26,11 @@ var ROUTES = require('../constants/routes');
 function getStateFromStores() {
   return {
     currentColor: 'red',
-    tempReading: TemperatureStore.getAll()
+    tempStore: TemperatureStore.getAll(),
+    currentTempSetting: TemperatureStore.getCurrentTemperatureSetting(),
+    currTempReading: TemperatureStore.getCurrentTemperatureReading(),
+    lowThreshold: TemperatureStore.getLowTempThreshDisplay(),
+    highThreshold: TemperatureStore.getHighTempThreshDisplay(),
   };
 }
 
@@ -36,12 +41,10 @@ var TempReader = React.createClass({
 
   componentDidMount: function() {
     TemperatureStore.addChangeListener(this._onChange);
-    // AlarmStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function() {
     TemperatureStore.removeChangeListener(this._onChange);
-    // AlarmStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function() {
@@ -58,7 +61,7 @@ var TempReader = React.createClass({
               borderColor: this.state.currentColor,
             }]}>
             <Text style={ styles.primaryTempText }>
-              { this.state.tempReading.get('tempF') + '℉' }
+              { this.state.currTempReading }
             </Text>
           </View>
           <View style={ styles.tempSettingsWrapper }>
@@ -67,20 +70,23 @@ var TempReader = React.createClass({
                 topLevelNav={ topLevelNav }
                 type="LOW"
                 title="LOW TEMP"
-                tempSettingNum={ this.state.tempReading.get('lowThreshold') + '℉' } />
+                tempSettingNum={ this.state.lowThreshold } />
             </View>
             <View style={ styles.tempWatchToggle }>
               <TempEnabledBtn
-                isEnabled={ this.state.tempReading.get('alarmEnabled') } />
+                isEnabled={ this.state.tempStore.get('alarmEnabled') } />
             </View>
             <View style={ styles.tempSettingHigh }>
               <TempSettingButton
                 topLevelNav={ topLevelNav }
                 type="HIGH"
                 title="HIGH TEMP"
-                tempSettingNum={ this.state.tempReading.get('highThreshold') + '℉' } />
+                tempSettingNum={ this.state.highThreshold } />
             </View>
           </View>
+        </View>
+        <View style={ styles.setTempDisplay }>
+          <SetTempDisplay />
         </View>
       </ScrollView>
     );
@@ -102,8 +108,12 @@ var styles = StyleSheet.create({
     fontWeight: '100',
     backgroundColor: 'rgba(0,0,0,0)'
   },
+  setTempDisplay: {
+    flex: 1,
+    top: 185,
+  },
   tempSettingsWrapper: {
-    top: 125,
+    top: 115,
     flexDirection: 'row',
   },
   tempSettingText: {

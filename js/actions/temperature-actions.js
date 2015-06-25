@@ -66,6 +66,20 @@ function onSetHighTemp(temp) {
   dispatch(onSetHighTemp, temp);
 }
 
+/**
+ * Goto the next temperature display mode
+ */
+function onNextTempDisplay() {
+  dispatch(onNextTempDisplay, null);
+}
+
+/**
+ * Goto the previous temperature display mode
+ */
+function onPrevTempDisplay() {
+  dispatch(onPrevTempDisplay, null);
+}
+
 module.exports = {
   onTemperatureUpdated,
   onTemperatureReadStart,
@@ -73,4 +87,6 @@ module.exports = {
   onClearTempWarning,
   onSetLowTemp,
   onSetHighTemp,
+  onNextTempDisplay,
+  onPrevTempDisplay,
 };

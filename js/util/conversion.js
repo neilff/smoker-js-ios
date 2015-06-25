@@ -47,10 +47,20 @@ function timeToMs(time) {
   return minAsMs + hrAsMs;
 }
 
+function convertCtoF(C) {
+  return Math.round((C * (9/5) + 32));
+}
+
+function convertFtoC(F) {
+  return Math.round(((F - 32) / (9/5)));
+}
+
 module.exports = {
   leftPad,
   convertMsToTime,
   msToTime,
   msToTimeShort,
   timeToMs,
+  convertCtoF,
+  convertFtoC,
 };

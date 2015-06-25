@@ -3,6 +3,7 @@ var Map = require('immutable').Map;
 var EventEmitter = require('eventemitter3');
 var register = require('../dispatcher/dispatcher').register;
 var assign = require('object-assign');
+var util = require('../util/conversion');
 
 var _temperatureState = Map({
   tempK: 0,
@@ -12,10 +13,53 @@ var _temperatureState = Map({
   highThreshold: 280,
   alarmEnabled: false,
   lowAlarm: false,
-  highAlarm: false
+  highAlarm: false,
+  tempSettings: [
+    {
+      name: 'Fahrenheit',
+      value: 'tempF',
+      symbol: '℉',
+    },
+    {
+      name: 'Celcius',
+      value: 'tempC',
+      symbol: '℃',
+    },
+  ],
+  currentTempSettingIdx: 0,
 });
 
 const CHANGE_EVENT = 'onTemperatureStoreChange';
+
+function getCurrentTemperatureSetting() {
+  var idx = _temperatureState.get('currentTempSettingIdx');
+
+  return _temperatureState.get('tempSettings')[idx];
+}
+
+function recalibrateThresholds(prevId, currId) {
+  var currLowThresh = _temperatureState.get('lowThreshold');
+  var currHighThresh = _temperatureState.get('highThreshold');
+  var newLowThresh = currLowThresh;
+  var newHighThresh = currHighThresh;
+
+  // Convert C to F
+  if (prevId === 'tempC' && currId === 'tempF') {
+    newLowThresh = util.convertCtoF(currLowThresh);
+    newHighThresh = util.convertCtoF(currHighThresh);
+  }
+
+  // Convert F to C
+  if (prevId === 'tempF' && currId === 'tempC') {
+    newLowThresh = util.convertFtoC(currLowThresh);
+    newHighThresh = util.convertFtoC(currHighThresh);
+  }
+
+  _temperatureState = _temperatureState.merge({
+    lowThreshold: newLowThresh,
+    highThreshold: newHighThresh,
+  });
+}
 
 var TemperatureStore = assign({}, EventEmitter.prototype, {
   emitChange: function() {
@@ -44,10 +88,33 @@ var TemperatureStore = assign({}, EventEmitter.prototype, {
 
   isTooHigh: function() {
     return _temperatureState.get('highAlarm');
-  }
+  },
+
+  getCurrentTemperatureSetting: getCurrentTemperatureSetting,
+
+  getCurrentTemperatureReading: function() {
+    var tempSetting = getCurrentTemperatureSetting();
+    var temp = _temperatureState.get(tempSetting.value);
+    var symbol = tempSetting.symbol;
+
+    return temp + symbol;
+  },
+
+  getLowTempThreshDisplay: function() {
+    var symbol = getCurrentTemperatureSetting().symbol;
+
+    return _temperatureState.get('lowThreshold') + symbol;
+  },
+
+  getHighTempThreshDisplay: function() {
+    var symbol = getCurrentTemperatureSetting().symbol;
+
+    return _temperatureState.get('highThreshold') + symbol;
+  },
 });
 
 TemperatureStore.dispatchToken = register(({action, data}) => {
+  var val = getCurrentTemperatureSetting().value;
 
   switch (action) {
 
@@ -55,8 +122,8 @@ TemperatureStore.dispatchToken = register(({action, data}) => {
      * When temperature updates arrive in the application
      */
     case actions.onTemperatureUpdated:
-      var isTooLow = data.tempF < _temperatureState.get('lowThreshold');
-      var isTooHigh = data.tempF > _temperatureState.get('highThreshold');
+      var isTooLow = data[val] < _temperatureState.get('lowThreshold');
+      var isTooHigh = data[val] > _temperatureState.get('highThreshold');
 
       _temperatureState = _temperatureState.merge({
         tempK: data.tempK,
@@ -105,6 +172,46 @@ TemperatureStore.dispatchToken = register(({action, data}) => {
         lowAlarm: false,
         highAlarm: false,
       });
+
+      TemperatureStore.emitChange();
+      break;
+
+    /**
+     * Select next temperature setting
+     */
+    case actions.onNextTempDisplay:
+      var prevSettingId = getCurrentTemperatureSetting().value;
+      var idx = _temperatureState.get('currentTempSettingIdx');
+      var totalOptions = _temperatureState.get('tempSettings').length;
+      var inc = idx + 1;
+
+      if (inc >= totalOptions) {
+        _temperatureState = _temperatureState.set('currentTempSettingIdx', 0);
+      } else {
+        _temperatureState = _temperatureState.set('currentTempSettingIdx', inc);
+      }
+
+      recalibrateThresholds(prevSettingId, getCurrentTemperatureSetting().value);
+
+      TemperatureStore.emitChange();
+      break;
+
+    /**
+     * Select previous temperature setting
+     */
+    case actions.onPrevTempDisplay:
+      var prevSettingId = getCurrentTemperatureSetting().value;
+      var idx = _temperatureState.get('currentTempSettingIdx');
+      var totalOptions = _temperatureState.get('tempSettings').length;
+      var dec = idx - 1;
+
+      if (dec < 0) {
+        _temperatureState = _temperatureState.set('currentTempSettingIdx', totalOptions - 1);
+      } else {
+        _temperatureState = _temperatureState.set('currentTempSettingIdx', dec);
+      }
+
+      recalibrateThresholds(prevSettingId, getCurrentTemperatureSetting().value);
 
       TemperatureStore.emitChange();
       break;
